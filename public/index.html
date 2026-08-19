@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps TaskBoard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>DevOps TaskBoard</h1>
+
+        <p>
+            Proyecto Final DevOps - Pipeline CI/CD
+        </p>
+
+        <form id="taskForm">
+            <input
+                id="taskInput"
+                type="text"
+                placeholder="Escribe una tarea..."
+                maxlength="120"
+                required
+            >
+
+            <button type="submit">
+                Agregar
+            </button>
+        </form>
+
+        <ul id="taskList"></ul>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+</html>

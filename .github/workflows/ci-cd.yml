@@ -1,0 +1,91 @@
+name: DevOps TaskBoard CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+
+  ci:
+
+    name: Test and Quality
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+
+      - name: Install dependencies
+        run: npm ci
+
+
+      - name: Static analysis
+        run: npm run lint
+
+
+      - name: Automated tests
+        run: npm test
+
+
+  deploy:
+
+    name: Docker and Deploy
+
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+
+    needs:
+      - ci
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/devops-taskboard:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/devops-taskboard:${{ github.sha }}
+
+
+      - name: Deploy to Render
+        run: |
+          curl --fail-with-body \
+          -X POST \
+          "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
